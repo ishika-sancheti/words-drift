@@ -8,14 +8,14 @@
     "Anxious",
     "Anxious attachment",
     "Avoidant attachment",
-    "avoidant",
-    "attachment",
+    "Avoidant",
+    "Attachment",
     "boundaries",
-    "boundary",
+    "Boundary",
     "depressed",
-    "depressing",
+    "Depressing",
     "depression",
-    "burn out",
+    "Burn out",
     "Acting out",
     "Dissociation",
     "Somatic symptom disorder",
@@ -26,7 +26,7 @@
     "Attachment theory",
     "Attachment styles",
     "Attachment-focused therapy",
-    "Emotion-focused therapy",  
+    "Emotion-focused therapy",
     "Reparenting",
     "Internal family systems",
     "Somatic experiencing",
@@ -49,7 +49,6 @@
     "Depersonalisation",
     "Emotional permanence",
     "Rejection sensitivity",
-    "Somatic experiencing",
     "Window of tolerance",
     "Attachment rupture",
     "Hypervigilance",
@@ -57,7 +56,6 @@
     "Rationalisation",
     "Sublimation",
     "Regression",
-    "Acting out",
     "Compartmentalisation",
     "Reaction formation",
     "Displacement",
@@ -65,7 +63,6 @@
     "Parentification",
     "Emotional flashback",
     "Co-regulation",
-    "Countertransference",
     "Projective identification"
   ],
   "Gaming": [
@@ -255,8 +252,6 @@
     "Contractualism",
     "Agent-relative reasons",
     "Agent-neutral reasons",
-    "Reification",
-    "Alienation",
     "Commodity fetishism",
     "False consciousness",
     "Interpellation",
@@ -343,10 +338,9 @@
     "Physis",
     "Nomos",
     "Doxa",
-    "Episteme",
     "Sophrosyne",
     "Katharsis",
-    "Henosis"  
+    "Henosis"
   ]
 }
 

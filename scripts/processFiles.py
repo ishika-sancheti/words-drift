@@ -6,23 +6,22 @@ import os
 from collections import defaultdict
 from typing import Iterable
 
+import json
+
 from fileStreams import getFileJsonStream
 from utils import FileProgressLog
-# from datetime import datetime
 
 import pandas as pd
 
-import json
+from pathlib import Path
 
-fileOrFolderPath = r"E:\movies\reddit\comments\RC_2012-10.zst"
+fileOrFolderPath = r"E:\movies\reddit\comments"
 subreddits_list_path=r"C:\Users\Ishika\words-drift\data\subreddit_dictionary.json"
 words_list_path=r"C:\Users\Ishika\words-drift\data\word_dictionary.json"
 
+output_dir=Path(r"C:\Users\Ishika\words-drift\data\processed")
+output_dir.mkdir(exist_ok=True)              #create a new dir if it doesnt exist
 recursive=False
-
-word_counter=defaultdict(int)
-total_post_counter=0
-subreddit_post_counter=defaultdict(int)
 
 with open(subreddits_list_path) as sr_list:			#this will give us the list of subreddits in which the words are to be searched
 	subreddits_list=json.load(sr_list)
@@ -30,16 +29,23 @@ with open(subreddits_list_path) as sr_list:			#this will give us the list of sub
 with open(words_list_path) as w_list:				#search these words and add a count to each word
 	words_list=json.load(w_list)
 
-def processFile(path: str):
+def processFile(path: str):    
+	#should be reset at every file and not keeping adding up from prev file data 
+	word_counter=defaultdict(int)
+	total_post_counter=0
+	subreddit_post_counter=defaultdict(int)    
+	for word in words_list["Psychology"]:
+		word_counter[word]=0 
+	for subreddit in subreddits_list["Psychology"]:
+		subreddit_post_counter[subreddit]=0
+
 	print(f"Processing file {path}")
 	with open(path, "rb") as f:
-		jsonStream = getFileJsonStream(path, f)
+		jsonStream=getFileJsonStream(path, f)
 		if jsonStream is None:
 			print(f"Skipping unknown file {path}")
 			return
 		progressLog=FileProgressLog(path, f)
-		global word_counter, total_post_counter, subreddit_post_counter
-		i=0
 		for row in jsonStream:
 			progressLog.onRow()
 			if row["body"]=="[deleted]":
@@ -49,13 +55,19 @@ def processFile(path: str):
 				subreddit_post_counter[row["subreddit"]]+=1
 				for word in words_list["Psychology"]:			#find the word from lists, in the body				
 					if word in row["body"].lower():
-						word_counter[word]+=1           					    #update the counter for the word in the resp subreddit
+						word_counter[word]+=1           					    #update the counter for the word in the resp subreddit		
 			else:
 				continue
-			i+=1
 		progressLog.logProgress("\n")
+		word_df=pd.DataFrame.from_dict(word_counter, orient='index', columns=['count'])
+		subreddit_df=pd.DataFrame.from_dict(subreddit_post_counter, orient='index', columns=['count'])
+		file_name=Path(path).stem
+		word_df.to_parquet(output_dir / f"{file_name}_word_count.parquet")
+		subreddit_df.to_parquet(output_dir /  f"{file_name}_subreddit_count.parquet")
+		return total_post_counter, subreddit_post_counter, word_counter
 	
 
+#iterating thru multiple files
 def processFolder(path: str):
 	fileIterator: Iterable[str]
 	if recursive:
@@ -84,9 +96,3 @@ def main():
 
 if __name__ == "__main__":
 	main()
-	word_df=pd.DataFrame.from_dict(word_counter, orient='index', columns=['count'])
-	subreddit_df=pd.DataFrame.from_dict(subreddit_post_counter, orient='index', columns=['count'])
-	print(word_df)
-	print(subreddit_df)
-	word_df.to_parquet(r"C:\Users\Ishika\words-drift\data\processed\word_count.parquet")
-	subreddit_df.to_parquet(r"C:\Users\Ishika\words-drift\data\processed\subreddit_count.parquet")
