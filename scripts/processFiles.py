@@ -10,6 +10,8 @@ from fileStreams import getFileJsonStream
 from utils import FileProgressLog
 # from datetime import datetime
 
+import pandas as pd
+
 import json
 
 fileOrFolderPath = r"E:\movies\reddit\comments\RC_2012-10.zst"
@@ -45,8 +47,9 @@ def processFile(path: str):
 			total_post_counter+=1
 			if row["subreddit"] in subreddits_list["Psychology"]:		
 				subreddit_post_counter[row["subreddit"]]+=1
-				if any(word in row["body"] for word in words_list["Psychology"]):			#find the word from lists, in the body				
-					word_counter["word"]+=1           					    #update the counter for the word in the resp subreddit
+				for word in words_list["Psychology"]:			#find the word from lists, in the body				
+					if word in row["body"].lower():
+						word_counter[word]+=1           					    #update the counter for the word in the resp subreddit
 			else:
 				continue
 			i+=1
@@ -78,8 +81,12 @@ def main():
 		processFile(fileOrFolderPath)
 	print("Done :>")
 	#print("\n", "no of posts counted: ", total_post_counter, "\n", "no of posts in the psychology subreddit counted: ", subreddit_post_counter, "\n","no of times the word 'psychoanalysis' is mentioned in psychology subreddit: ", word_counter, "\n")
-	print(subreddits_list)
-	print(words_list)
 
 if __name__ == "__main__":
 	main()
+	word_df=pd.DataFrame.from_dict(word_counter, orient='index', columns=['count'])
+	subreddit_df=pd.DataFrame.from_dict(subreddit_post_counter, orient='index', columns=['count'])
+	print(word_df)
+	print(subreddit_df)
+	word_df.to_parquet(r"C:\Users\Ishika\words-drift\data\processed\word_count.parquet")
+	subreddit_df.to_parquet(r"C:\Users\Ishika\words-drift\data\processed\subreddit_count.parquet")
