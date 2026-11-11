@@ -15,12 +15,14 @@ import pandas as pd
 
 from pathlib import Path
 
+import re
+
 fileOrFolderPath = r"E:\movies\reddit\comments"
 subreddits_list_path=r"C:\Users\Ishika\words-drift\data\subreddit_dictionary.json"
 words_list_path=r"C:\Users\Ishika\words-drift\data\word_dictionary.json"
 
 output_dir=Path(r"C:\Users\Ishika\words-drift\data\processed")
-output_dir.mkdir(exist_ok=True)              #create a new dir if it doesnt exist
+output_dir.mkdir(exist_ok=True)              #create a new dir if it doesnt exist exist_ok=true
 recursive=False
 
 with open(subreddits_list_path) as sr_list:			#this will give us the list of subreddits in which the words are to be searched
@@ -29,15 +31,41 @@ with open(subreddits_list_path) as sr_list:			#this will give us the list of sub
 with open(words_list_path) as w_list:				#search these words and add a count to each word
 	words_list=json.load(w_list)
 
-def processFile(path: str):    
-	#should be reset at every file and not keeping adding up from prev file data 
-	word_counter=defaultdict(int)
-	total_post_counter=0
-	subreddit_post_counter=defaultdict(int)    
-	for word in words_list["Psychology"]:
-		word_counter[word]=0 
-	for subreddit in subreddits_list["Psychology"]:
-		subreddit_post_counter[subreddit]=0
+patterns={}
+for category in words_list:
+	patterns[category]={
+		word:re.compile(r"\b" + re.escape(word) + r"\b")
+		for word in words_list[category]
+	}
+
+def processFile(path: str):
+	file_name=Path(path).stem
+	if (output_dir/next(iter(words_list))/f"{file_name}_word_count.parquet").exists():
+		print(f"Skipping {path}, already processed")
+		return
+	   
+	category_dirs={}								#creating a separate dir for every category
+	for category in words_list:
+		category_dir=output_dir/category
+		category_dir.mkdir(parents=True, exist_ok=True)
+		category_dirs[category]=category_dir
+
+	all_niche=set().union(*subreddits_list.values())
+	sitewide_counter={c: {w: 0 for w in words_list[c]} for c in words_list}
+	non_niche_seen=0
+	sampled_total=0
+	
+	#counters should be reset at every file and not keeping adding up from prev
+	total_post_counter=0   
+	word_counter={}
+	subreddit_post_counter={}
+	for category in words_list:						
+		word_counter[category]=defaultdict(int)
+		subreddit_post_counter[category]=defaultdict(int)
+		for word in words_list[category]:				             #initialising every word and subreddit count to zero
+			word_counter[category][word]=0 
+		for subreddit in subreddits_list[category]:
+			subreddit_post_counter[category][subreddit]=0
 
 	print(f"Processing file {path}")
 	with open(path, "rb") as f:
@@ -51,21 +79,36 @@ def processFile(path: str):
 			if row["body"]=="[deleted]":
 				continue
 			total_post_counter+=1
-			if row["subreddit"] in subreddits_list["Psychology"]:		
-				subreddit_post_counter[row["subreddit"]]+=1
-				for word in words_list["Psychology"]:			#find the word from lists, in the body				
-					if word in row["body"].lower():
-						word_counter[word]+=1           					    #update the counter for the word in the resp subreddit		
-			else:
-				continue
+			subreddit=row["subreddit"].lower()
+			for category in words_list:
+				if subreddit in subreddits_list[category]:	
+					subreddit_post_counter[category][subreddit]+=1
+					body=row["body"].lower()
+					for word, pattern in patterns[category].items():									#find the word from lists, in the body				
+						if word in body and pattern.search(body):
+							word_counter[category][word]+=1           		#update the counter for the word in the resp subreddit		
+			if subreddit not in all_niche:
+				non_niche_seen+=1
+				if non_niche_seen%10==0:
+					sampled_total+=1
+					body=row["body"].lower()
+					for category in patterns:
+						for word, pattern in patterns[category].items():									#find the word from lists, in the body				
+							if word in body and pattern.search(body):
+								sitewide_counter[category][word]+=1
+		
 		progressLog.logProgress("\n")
-		word_df=pd.DataFrame.from_dict(word_counter, orient='index', columns=['count'])
-		subreddit_df=pd.DataFrame.from_dict(subreddit_post_counter, orient='index', columns=['count'])
-		file_name=Path(path).stem
-		word_df.to_parquet(output_dir / f"{file_name}_word_count.parquet")
-		subreddit_df.to_parquet(output_dir /  f"{file_name}_subreddit_count.parquet")
+		for category in words_list:
+			word_df=pd.DataFrame.from_dict(word_counter[category], orient='index', columns=['count'])
+			word_df["sitewide_count"]=pd.Series(sitewide_counter[category])
+			word_df["sitewide_sampled"]=sampled_total
+			subreddit_df=pd.DataFrame.from_dict(subreddit_post_counter[category], orient='index', columns=['count'])
+			subreddit_df["total_comments"]=total_post_counter
+			
+			file_name=Path(path).stem
+			word_df.to_parquet(category_dirs[category] / f"{file_name}_word_count.parquet")
+			subreddit_df.to_parquet(category_dirs[category] / f"{file_name}_subreddit_count.parquet")
 		return total_post_counter, subreddit_post_counter, word_counter
-	
 
 #iterating thru multiple files
 def processFolder(path: str):
