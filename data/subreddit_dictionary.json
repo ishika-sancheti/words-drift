@@ -1,9 +1,9 @@
 {
-    "Psychology":[
+    "psychology":[
         "psychology",
         "fictionalpsychology",
         "askpsychology",
-        "Darkpsychology",
+        "darkpsychology",
         "psychologystudents",
         "academicpsychology",
         "neuropsychology",
@@ -11,41 +11,66 @@
         "psychologytalk",
         "psychologymemes"
     ],
-    "Gaming":[
+    "gaming":[
         "gaming",
         "pcgaming",
         "truegaming",
-        "Gamingcirclejerk",
+        "gamingcirclejerk",
         "gamingnews",
-        "Indiangaming",
-        "GamingLeaksAndRumours",
-        "IndieGaming",
-        "retroGaming",
+        "indiangaming",
+        "gamingleaksandrumours",
+        "indiegaming",
+        "retrogaming",
         "linux_gaming"
     ],
-    "Economics":[
-        "Economics",
-        "AskEconomics",
-        "EconomicHistory",
+    "economics":[
+        "economics",
+        "askeconomics",
+        "economichistory",
         "badeconomics",
-        "economicCollapse",
-        "SpainEconomics",
-        "Austrian_Economics",
-        "BehavioralEconomics",
-        "EconomicsMemes",
-        "Academiceconomics"
+        "economiccollapse",
+        "spaineconomics",
+        "austrian_economics",
+        "behavioraleconomics",
+        "economicsmemes",
+        "academiceconomics"
     ],
-    "Philosophy":[
-        "Philosophy",
+    "philosophy":[
+        "philosophy",
         "askphilosophy",
-        "PhilosophyofScience",
-        "PhilosophyMemes",
+        "philosophyofscience",
+        "philosophymemes",
         "badphilosophy",
-        "StonerPhilosophy",
-        "AcademicPhilosophy",
-        "PhilosophyBookClub",
-        "PoliticalPhilosophy",
-        "PhilosophyofReligion"
+        "stonerphilosophy",
+        "academicphilosophy",
+        "philosophybookclub",
+        "politicalphilosophy",
+        "philosophyofreligion"
+    ],
+    "poltics":[
+        "news",
+        "worldnews",
+        "politics",
+        "geopolitics",
+        "neutralpolitics",
+        "ukpolitics",
+        "moderatepolitics",
+        "canadapolitics",
+        "australianpolitics",
+        "gunpolitics",
+        "shitpoliticssays",
+        "ask_politics"
+    ],
+    "finance":[
+        "personalfinance",
+        "povertyfinance",
+        "personalfinancecanada",
+        "ukpersonalfinance",
+        "eupersonalfinance",
+        "ausfinance",
+        "personalfinanceindia",
+        "fluentinfinance",
+        "vosfinances"
     ]
 
 }
